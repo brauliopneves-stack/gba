@@ -15,7 +15,7 @@ function RoundRect([float]$x, [float]$y, [float]$w, [float]$h, [float]$r) {
   return $p
 }
 
-function Draw([int]$size, [string]$name, [float]$inset) {
+function Draw([int]$size, [string]$name, [float]$inset, [string]$dir = $out) {
   $bmp = New-Object System.Drawing.Bitmap $size, $size
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.SmoothingMode = 'AntiAlias'
@@ -57,7 +57,7 @@ function Draw([int]$size, [string]$name, [float]$inset) {
   $g.DrawLine($pen, $cx + 80 * $k, $cy, $cx + 55 * $k, $cy - 22 * $k)
   $g.DrawLine($pen, $cx - 80 * $k, $cy, $cx - 55 * $k, $cy + 22 * $k)
 
-  $bmp.Save((Join-Path $out $name), [System.Drawing.Imaging.ImageFormat]::Png)
+  $bmp.Save((Join-Path $dir $name), [System.Drawing.Imaging.ImageFormat]::Png)
   $g.Dispose(); $bmp.Dispose()
 }
 
@@ -65,3 +65,5 @@ Draw 512 'icon-512.png' 1.0
 Draw 192 'icon-192.png' 1.0
 Draw 180 'apple-touch-icon.png' 1.0
 Draw 512 'icon-maskable-512.png' 0.78
+# Native iPhone app icon (iOS rounds the corners itself)
+Draw 1024 'icon-1024.png' 1.0 (Join-Path $PSScriptRoot '..\ios\Sources\Assets.xcassets\AppIcon.appiconset')

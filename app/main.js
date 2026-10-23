@@ -89,6 +89,17 @@ function readFile(file) {
 }
 
 async function shareOrDownload(data, filename) {
+  // Inside the native iPhone app the share sheet is opened by Swift
+  const bridge = window.webkit?.messageHandlers?.share;
+  if (bridge) {
+    const bytes = new Uint8Array(data);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    }
+    bridge.postMessage({ name: filename, data: btoa(binary) });
+    return;
+  }
   const file = new File([data], filename, { type: 'application/octet-stream' });
   if (navigator.canShare?.({ files: [file] })) {
     try {
@@ -574,6 +585,24 @@ function resumeAudio() {
 
 // iOS only lets audio start from a user gesture
 addEventListener('pointerdown', resumeAudio, true);
+
+// iOS Safari ignores user-scalable=no and touch-action is not always enough:
+// block pinch and double-tap zoom explicitly. Inside the console every touch
+// is cancelled (buttons are driven by pointer events), elsewhere only a quick
+// second tap is.
+addEventListener('gesturestart', (e) => e.preventDefault());
+addEventListener('dblclick', (e) => e.preventDefault());
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length > 1 || e.target.closest('.cluster, .screens')) e.preventDefault();
+}, { passive: false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  // Real buttons keep their clicks; touch-action: manipulation already stops
+  // them from zooming
+  if (now - lastTouchEnd < 350 && !e.target.closest('button, input, textarea, a')) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
 
 // Pause and write saves whenever the app goes to the background: iOS may
 // kill a backgrounded web app without warning

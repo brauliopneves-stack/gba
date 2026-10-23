@@ -34,6 +34,8 @@ html, body {
   color: var(--ink);
   font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  /* No double-tap zoom anywhere */
+  touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   overscroll-behavior: none;
 }

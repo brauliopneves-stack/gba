@@ -2,3 +2,6 @@
 *.gba
 *.sav
 *.zip
+ios/www/
+ios/build/
+ios/*.xcodeproj/

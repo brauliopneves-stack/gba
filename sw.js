@@ -1,6 +1,6 @@
 // Offline cache for the app shell. Bump VERSION whenever any file changes so
 // installed copies pick up the update.
-const VERSION = 'gba-link-v1';
+const VERSION = 'gba-link-v2';
 
 const FILES = [
   './',

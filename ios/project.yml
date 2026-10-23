@@ -1,0 +1,44 @@
+# XcodeGen spec for the native iPhone app. The CI workflow copies the web
+# app into ios/www before generating the project; the app shows it in a
+# full-screen WKWebView (see Sources/WebViewController.swift).
+name: GBALink
+options:
+  bundleIdPrefix: com.brauliopneves
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  GBALink:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: www
+        type: folder
+        buildPhase: resources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: GBA Link
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIRequiresFullScreen: true
+        UIStatusBarStyle: UIStatusBarStyleLightContent
+        UIViewControllerBasedStatusBarAppearance: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: false
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.brauliopneves.gbalink
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""

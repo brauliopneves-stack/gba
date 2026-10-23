@@ -1,0 +1,58 @@
+# Builds the iPhone app on a macOS runner and publishes an unsigned
+# GBALink.ipa as the "latest" GitHub release. Sideloadly / AltStore sign it
+# with your Apple ID when installing.
+name: Build iPhone app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy the emulator into the iOS project
+        run: |
+          mkdir -p ios/www
+          cp -R index.html manifest.webmanifest app core icons ios/www/
+
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Build
+        run: |
+          cd ios
+          xcodebuild -project GBALink.xcodeproj -target GBALink -configuration Release \
+            -sdk iphoneos SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package .ipa
+        run: |
+          cd ios
+          mkdir Payload
+          cp -R build/Release-iphoneos/GBALink.app Payload/
+          zip -qry GBALink.ipa Payload
+          ls -l GBALink.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GBALink-ipa
+          path: ios/GBALink.ipa
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest ios/GBALink.ipa \
+            --title "GBA Link (iPhone)" \
+            --notes "Baixe GBALink.ipa e instale com o Sideloadly. Versão gerada a partir de ${GITHUB_SHA::7}."
